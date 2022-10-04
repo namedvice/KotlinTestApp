@@ -1,97 +1,81 @@
 package com.example.mysecondapp
 
+
 import android.app.*
-import android.content.Intent
+import android.media.midi.MidiDeviceInfo
+import android.media.midi.MidiManager
+
+
+import android.media.midi.MidiReceiver
+
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.format.DateFormat
+import android.view.View
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.example.mysecondapp.databinding.ActivityMainBinding
 import java.util.*
+
+import com.mobileer.miditools.MidiConstants
+
+import com.mobileer.miditools.MidiInputPortSelector
+
+import com.mobileer.miditools.MusicKeyboardView
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    private var mKeyboardReceiverSelector: MidiInputPortSelector? = null
+    private var mKeyboard: MusicKeyboardView? = null
+    private val mProgramButton: Button? = null
+    private var mMidiManager: MidiManager? = null
+    private val mChannel // ranges from 0 to 15
+            = 0
+    private val mPrograms = IntArray(MidiConstants.MAX_CHANNELS) // ranges from 0 to 127
+
+    private val mByteBuffer = ByteArray(3)
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    var infos: Array<MidiDeviceInfo> = m.getDevices()
+
+    @RequiresApi(Build.VERSION_CODES.M)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(R.layout.activity_main)
 
-        setContentView(binding.root)
-        createNotificationChannel()
-        binding.submitButton.setOnClickListener { scheduleNotification() }
+        val txt: TextView = findViewById(R.id.tv_debug)
+
+        print(txt)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun scheduleNotification() {
-        val intent = Intent(applicationContext, Notification::class.java)
-        val title = binding.titleET.text.toString()
-        val message = binding.messageET.text.toString()
-        intent.putExtra(titleExtra, title)
-        intent.putExtra(messageExtra, message)
+    private fun setupMidi() {
+        mMidiManager = getSystemService(MIDI_SERVICE) as MidiManager
+        if (mMidiManager == null) {
+            Toast.makeText(this, "MidiManager is null!", Toast.LENGTH_LONG)
+                .show()
+            return
+        }
 
-        val pendingIntent = PendingIntent.getBroadcast(
-            applicationContext,
-            notificationID,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        // Setup Spinner that selects a MIDI input port.
+        mKeyboardReceiverSelector = MidiInputPortSelector(
+            mMidiManager,
+            this, R.id.spinner_receivers
         )
-        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-        val time = getTime()
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            time,
-            pendingIntent
-        )
-        showAlert(time, title, message)
+        mKeyboard = findViewById<View>(R.id.musicKeyboardView) as MusicKeyboardView
+        mKeyboard.addMusicKeyListener(object : MusicKeyListener() {
+            fun onKeyDown(keyIndex: Int) {
+                noteOn(mChannel, keyIndex, MainActivity.DEFAULT_VELOCITY)
+            }
+
+            fun onKeyUp(keyIndex: Int) {
+                noteOff(mChannel, keyIndex, MainActivity.DEFAULT_VELOCITY)
+            }
+        })
     }
-
-    private fun showAlert(time: Long, title: String, message: String) {
-        val date = Date(time)
-        val dateFormat = DateFormat.getLongDateFormat(applicationContext)
-        val timeFormat = DateFormat.getTimeFormat(applicationContext)
-
-        AlertDialog.Builder(this)
-            .setTitle("Notification Scheduled")
-            .setMessage(
-                "Title: " + title +
-                        "\nMessage: " + message +
-                        "\nAT: " + dateFormat.format(date) + " " + timeFormat.format(date)
-            )
-            .setPositiveButton("Okay") { _, _ -> }
-            .show()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun getTime(): Long {
-        val minute = binding.timePicker.minute
-        val hour = binding.timePicker.hour
-        val day = binding.datePicker.dayOfMonth
-        val month = binding.datePicker.month
-        val year = binding.datePicker.year
-        val calendar = Calendar.getInstance()
-        calendar.set(year, month, day, hour, minute)
-        return calendar.timeInMillis
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel() {
-        val name = "Notif Channel"
-        val desc = "A desc"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(channelID, name, importance)
-        channel.description = desc
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-    }
-}
-
-
-private fun AlarmManager.setExactAndAllowWhileIdle(
-    rtcWakeup: Int,
-    time: Unit,
-    pendingIntent: PendingIntent?
-) {
 
 }
