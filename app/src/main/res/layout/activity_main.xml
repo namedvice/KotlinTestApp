@@ -2,8 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:orientation="horizontal">
+
 
 
     <Button
@@ -23,15 +26,15 @@
         android:layout_width="272dp"
         android:layout_height="403dp"
         android:background="@color/cardview_light_background"
+        android:divider="?android:attr/dividerHorizontal"
+        android:showDividers="middle"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageButton
-
-            />
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"></TableRow>
 
         <TableRow
             android:layout_width="match_parent"
@@ -45,5 +48,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </TableLayout>
+
+    <TableLayout
+        android:id="@+id/elements_matrix"
+        android:layout_width="453dp"
+        android:layout_height="269dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+    </TableLayout>
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="255dp"
+        android:layout_height="142dp"
+        android:rotation="270"
+        android:thumb="@drawable/custom_thumb"
+        app:layout_constraintBottom_toBottomOf="@+id/elements_matrix"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/elements_matrix" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

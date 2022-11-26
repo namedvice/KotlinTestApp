@@ -1,19 +1,23 @@
-//package com.example.mysecondapp
-//
-//import android.content.Context
-//
-//class ControlButton(val IsToggle, val ID) : ControlElement() {
-//
-//    private val isToggle = IsToggle
-//    val buttonId = ID
-//
-//    constructor(context: Context) : super(context){
-//        init()
-//    }
-//
-//
-//    if(isToggle){
-//find
-//    }
-//
-//}
+package com.example.mysecondapp
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Canvas
+
+@SuppressLint("ViewConstructor")
+class ControlButton(ctx: Context, toggleMode: Boolean, ID: Int, positionX: Int, positionY: Int) :
+    ControlElement(ctx, positionX, positionY) {
+
+    private val isToggle = toggleMode
+    val buttonId = ID
+
+
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        if (isToggle) {
+
+        }
+    }
+
+
+}
