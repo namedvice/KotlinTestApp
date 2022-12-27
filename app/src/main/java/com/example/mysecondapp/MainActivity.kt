@@ -20,12 +20,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.google.android.material.slider.Slider
-import dev.atsushieno.ktmidi.AndroidMidiAccess
+//import dev.atsushieno.ktmidi.AndroidMidiAccess
 
 
 public class MainActivity<string> : AppCompatActivity() {
 
-    private var mMidiAccess: AndroidMidiAccess? = null
+//    private var mMidiAccess: AndroidMidiAccess? = null
 
     private var mMidiManager: MidiManager? = null
 
@@ -95,14 +95,14 @@ public class MainActivity<string> : AppCompatActivity() {
     }
 
     private fun setupElementsTable() {
-        val elementsTable = findViewById<TableLayout>(R.id.control_elements)
+        val elementsTable = findViewById<TableRow>(R.id.control_elements_row1)
         for (i in 1..3) {
-            val newControlElement = Button(this)
-            newControlElement.tag = "sliderCE"
+            val newControlElement = TableElement(this, "sliderCE", 0, 0)
             newControlElement.setOnClickListener() {
                 if (selectedSquare != null && newControlElement.tag == "sliderCE") {
-                    var newControlSlider = ControlSlider(this, selectedSquare!!.x.toInt(), selectedSquare!!.y.toInt())
-                    findViewById<ConstraintLayout>(R.id.mainLayout).addView(newControlElement)
+                    val newControlSlider =
+                        ControlSlider(this, selectedSquare!!.x.toInt(), selectedSquare!!.y.toInt())
+                    findViewById<ConstraintLayout>(R.id.mainLayout).addView(newControlSlider)
                 }
             }
             elementsTable.addView(newControlElement)

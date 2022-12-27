@@ -6,32 +6,35 @@ import android.graphics.Canvas
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatImageButton
 
 
 @SuppressLint("ViewConstructor", "UseCompatLoadingForDrawables")
-open class ControlElement(ctx: Context, positionX: Int, positionY: Int) : AppCompatButton(ctx) {
+open class ControlElement(ctx: Context, positionX: Int, positionY: Int) :
+    AppCompatImageButton(ctx) {
 
-    var elementSelected = false
+    private var elementSelected = false
     private var defaultHeight = 150
     private var defaultWidth = 150
 
 
     init {
         tag = "btXYZ";
-        minimumHeight = 10
-        minimumWidth = 10
-        height = defaultHeight
-        width = defaultWidth
+        minimumHeight = defaultHeight
+        minimumWidth = defaultHeight
+        maxHeight = defaultHeight + 100
+        maxWidth = defaultWidth + 100
         Log.e("ControlElement", "Height is $height")
         Log.e("ControlElement", "Width is $width")
         this.setOnClickListener {
             (ctx as MainActivity<*>).selectedSquare?.deselect()
             Log.e("Control Element", elementSelected.toString())
-            height = defaultHeight + 10
-            width = defaultWidth + 10
+            maxHeight = defaultHeight + 10
+            maxWidth = defaultWidth + 10
             Log.e("ControlElement", "Context is $ctx")
             ctx.selectedSquare = this
         }
@@ -55,7 +58,7 @@ open class ControlElement(ctx: Context, positionX: Int, positionY: Int) : AppCom
     }
 
     fun deselect() {
-        height = defaultHeight
-        width = defaultWidth
+        maxHeight = defaultHeight
+        maxWidth = defaultWidth
     }
 }
