@@ -23,6 +23,7 @@
     <TableLayout
         android:id="@+id/control_elements"
         android:layout_width="272dp"
+
         android:layout_height="403dp"
         android:background="@color/cardview_light_background"
         android:divider="?android:attr/dividerHorizontal"
@@ -50,7 +51,28 @@
     </TableLayout>
 
     <TableLayout
+        android:id="@+id/element_options"
+        android:layout_width="266dp"
+        android:layout_height="236dp"
+        android:visibility="invisible"
+        android:background="@color/cardview_dark_background"
+        android:divider="?android:attr/dividerHorizontal"
+        android:showDividers="middle"
+        android:tag="element_options"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+    </TableLayout>
+    <TableLayout
         android:id="@+id/elements_matrix"
+        android:visibility="invisible"
         android:layout_width="454dp"
         android:layout_height="326dp"
         app:layout_constraintBottom_toBottomOf="parent"

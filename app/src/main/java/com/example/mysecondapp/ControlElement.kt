@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.TableLayout
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageButton
@@ -31,6 +32,8 @@ open class ControlElement(ctx: Context, positionX: Int, positionY: Int) :
         Log.e("ControlElement", "Height is $height")
         Log.e("ControlElement", "Width is $width")
         this.setOnClickListener {
+            (ctx as MainActivity<*>).findViewById<TableLayout>(R.id.element_options).visibility = INVISIBLE
+            (ctx as MainActivity<*>).findViewById<TableLayout>(R.id.control_elements).visibility = VISIBLE
             (ctx as MainActivity<*>).selectedSquare?.deselect()
             Log.e("Control Element", elementSelected.toString())
             maxHeight = defaultHeight + 10

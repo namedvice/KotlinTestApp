@@ -11,23 +11,25 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.SeekBar
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.isVisible
-import com.google.android.material.slider.Slider
+
+
 //import dev.atsushieno.ktmidi.AndroidMidiAccess
 
 
 public class MainActivity<string> : AppCompatActivity() {
 
-//    private var mMidiAccess: AndroidMidiAccess? = null
+    //    private var mMidiAccess: AndroidMidiAccess? = null
+    var empDataHashMap = HashMap<String, String>()
+    var empList: ArrayList<HashMap<String, String>> = ArrayList()
 
     private var mMidiManager: MidiManager? = null
+    var bEditMode = false
 
     @RequiresApi(Build.VERSION_CODES.M)
     private val mDispatcher: MidiDispatcher = MidiDispatcher()
@@ -39,19 +41,10 @@ public class MainActivity<string> : AppCompatActivity() {
 
 
     @SuppressLint("ClickableViewAccessibility", "MissingInflatedId")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-//        val ll = findViewById<View>(R.id.activity_main) as ConstraintLayout
-//        ll.addView(myButton)
-
-//        val inflater = ContextCompat.getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
-//        parent!!.addView(ControlElement)
-//        for (i in 0..3) {
-//
-//        }
         setupElementsMatrix()
         setupElementsTable()
         setupEditButton()
@@ -81,32 +74,60 @@ public class MainActivity<string> : AppCompatActivity() {
     }
 
     private fun setupEditButton() {
-        val controlElementsTable = findViewById<TableLayout>(R.id.control_elements)
-        val editModeButton = findViewById<Button>(R.id.edit_mode_btn)
-        editModeButton.setOnClickListener {
-            if (controlElementsTable.isVisible) {
-                controlElementsTable.visibility = View.INVISIBLE
-            } else {
-                controlElementsTable.visibility = View.VISIBLE
-            }
-            Log.e("Layout", controlElementsTable.isVisible.toString())
-
+        val controlElementsTableRef = findViewById<TableLayout>(R.id.control_elements)
+        val editModeButtonRef = findViewById<Button>(R.id.edit_mode_btn)
+        val elementsMatrixRef = findViewById<TableLayout>(R.id.elements_matrix)
+        checkElementsMenuUI(elementsMatrixRef, controlElementsTableRef)
+        editModeButtonRef.setOnClickListener {
+            bEditMode = !bEditMode
+            editModeButtonRef.text = if (bEditMode) "Confirm" else "Edit"
+            checkElementsMenuUI(elementsMatrixRef, controlElementsTableRef)
+            Log.e("EditMode", bEditMode.toString())
         }
     }
 
+    private fun checkElementsMenuUI(
+        elementsMatrixRef: TableLayout, controlElementsTableRef: TableLayout
+    ) {
+        val elementOptionsRef = findViewById<TableLayout>(R.id.element_options)
+        if (bEditMode) {
+            controlElementsTableRef.visibility = View.VISIBLE
+            elementsMatrixRef.visibility = View.VISIBLE
+        } else {
+            elementOptionsRef.visibility = View.INVISIBLE
+            controlElementsTableRef.visibility = View.INVISIBLE
+            elementsMatrixRef.visibility = View.INVISIBLE
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun setupElementsTable() {
         val elementsTable = findViewById<TableRow>(R.id.control_elements_row1)
-        for (i in 1..3) {
-            val newControlElement = TableElement(this, "sliderCE", 0, 0)
+        //list of elements in table
+        val elems = arrayOf("sliderCE", "buttonCE")
+        for (elemTag in elems) {
+            val newControlElement = TableElement(this, elemTag, 0, 0)
             newControlElement.setOnClickListener() {
-                if (selectedSquare != null && newControlElement.tag == "sliderCE") {
-                    val newControlSlider =
-                        ControlSlider(this, selectedSquare!!.x.toInt(), selectedSquare!!.y.toInt())
-                    findViewById<ConstraintLayout>(R.id.mainLayout).addView(newControlSlider)
+                if (selectedSquare != null) {
+                    val lPosition = IntArray(2)
+                    selectedSquare!!.getLocationOnScreen(lPosition)
+                    when (newControlElement.tag) {
+                        "sliderCE" -> {
+                            val newControlSlider =
+                                ControlSlider(this, mInputPort, lPosition[0], lPosition[1])
+                            findViewById<ConstraintLayout>(R.id.mainLayout).addView(newControlSlider)
+                        }
+                        "buttonCE" -> {
+                            val newControlButton =
+                                ControlButton(this, mInputPort, false, lPosition[0], lPosition[1])
+                            findViewById<ConstraintLayout>(R.id.mainLayout).addView(newControlButton)
+                        }
+                    }
                 }
             }
             elementsTable.addView(newControlElement)
         }
+        val newControlElement = TableElement(this, "buttonCE", 0, 0)
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -115,8 +136,6 @@ public class MainActivity<string> : AppCompatActivity() {
 
         var matrixRow = TableRow(this)
 
-        val XStep = 200 //distance between Columns
-        val YStep = 50 //distance between Rows
 
         val rowsAmount = 4
         val columnsAmount = 8
@@ -126,13 +145,13 @@ public class MainActivity<string> : AppCompatActivity() {
         val array = Array(rowsAmount) { Array(columnsAmount) { mutableListOf<Int>(0, 0) } }
         //calculate matrix positions
         val matrixElements = mutableListOf<ControlElement>()
+        val xStep = 200 //distance between Columns
+        val yStep = 50 //distance between Rows
         for (i in array.indices) {
             for (j in array[i].indices) {
-                array[i][j][0] = XStep * j
-                array[i][j][1] = YStep * (i + 1)
-
-                val matrixElement =
-                    ControlElement(this, array[i][j][0], array[i][j][1])
+                array[i][j][0] = xStep * j
+                array[i][j][1] = yStep * (i + 1)
+                val matrixElement = ControlElement(this, array[i][j][0], array[i][j][1])
                 matrixElements.add(matrixElement)
                 matrixRow.addView(matrixElement)
 //                Log.e("Matrix", matrixElements[j].left.toString())
@@ -191,8 +210,7 @@ public class MainActivity<string> : AppCompatActivity() {
     }
 
     private fun debugMessage(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG)
-            .show()
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     fun selectSquare(square: ControlElement) {
