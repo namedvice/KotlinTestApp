@@ -22,7 +22,6 @@ open class ControlElement(ctx: Context, positionX: Int, positionY: Int) :
     private var defaultHeight = 150
     private var defaultWidth = 150
 
-
     init {
         tag = "btXYZ";
         minimumHeight = defaultHeight
@@ -32,14 +31,19 @@ open class ControlElement(ctx: Context, positionX: Int, positionY: Int) :
         Log.e("ControlElement", "Height is $height")
         Log.e("ControlElement", "Width is $width")
         this.setOnClickListener {
-            (ctx as MainActivity<*>).findViewById<TableLayout>(R.id.element_options).visibility = INVISIBLE
-            (ctx as MainActivity<*>).findViewById<TableLayout>(R.id.control_elements).visibility = VISIBLE
+            (ctx as MainActivity<*>).findViewById<TableLayout>(R.id.element_options).visibility =
+                INVISIBLE
+            (ctx as MainActivity<*>).findViewById<TableLayout>(R.id.control_elements).visibility =
+                VISIBLE
             (ctx as MainActivity<*>).selectedSquare?.deselect()
             Log.e("Control Element", elementSelected.toString())
             maxHeight = defaultHeight + 10
             maxWidth = defaultWidth + 10
             Log.e("ControlElement", "Context is $ctx")
             ctx.selectedSquare = this
+            if ((ctx as MainActivity<*>).bEditMode) {
+
+            }
         }
     }
 

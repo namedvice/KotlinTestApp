@@ -7,8 +7,11 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.drawable.ScaleDrawable
 import android.media.midi.MidiInputPort
+import android.opengl.Visibility
 import android.os.Build
 import android.util.Log
+import android.view.ViewManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TableLayout
@@ -36,6 +39,10 @@ class ControlButton(
         setBackgroundResource(R.drawable.checkbox_on_background)
         var pitch = 60
         val pitchSelector = EditText(ctx as MainActivity<*>)
+        val deleteButton = Button(ctx as MainActivity<*>)
+        /*deleteButton.setOnClickListener() {
+            visibility = GONE
+        }*/
         pitchSelector.setText("90")
 /*
     layoutParams = LinearLayout.LayoutParams(100, 100);
@@ -57,6 +64,7 @@ class ControlButton(
                 }
                 (ctx as MainActivity<*>).findViewById<TableLayout>(com.example.mysecondapp.R.id.element_options)
                     .addView(pitchSelector)
+
 
             } else {
                 //sending note with velocity 127 to START it

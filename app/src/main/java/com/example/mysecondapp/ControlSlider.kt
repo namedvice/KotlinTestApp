@@ -31,7 +31,7 @@ class ControlSlider(ctx: Context, mInputPort: MidiInputPort?, posX: Int, posY: I
         )
         Log.e("SeekBar", progress.toString())
 
-        var pitch = 90
+        var pitch = 61
 
         this.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -40,7 +40,7 @@ class ControlSlider(ctx: Context, mInputPort: MidiInputPort?, posX: Int, posY: I
                 var numBytes = 0
                 val channel = 1 // MIDI channels 1-16 are encoded as 0-15.
                 val group = 0
-                buffer[numBytes++] = (0x20 + group).toByte() // MIDI 1.0 voice message
+//                buffer[numBytes++] = (0x20 + group).toByte() // MIDI 1.0 voice message
 
                 buffer[numBytes++] = (0x90 + (channel - 1)).toByte() // note on
                 buffer[numBytes++] = pitch.toByte() // pitch is middle C

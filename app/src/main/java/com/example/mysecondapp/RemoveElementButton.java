@@ -1,2 +1,4 @@
-package com.example.mysecondapp;public class RemoveElementButton {
+package com.example.mysecondapp;
+
+public class RemoveElementButton {
 }

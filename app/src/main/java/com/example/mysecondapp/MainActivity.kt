@@ -17,6 +17,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import java.io.IOException
+import java.io.InputStream
 
 
 //import dev.atsushieno.ktmidi.AndroidMidiAccess
@@ -36,9 +38,13 @@ public class MainActivity<string> : AppCompatActivity() {
     private var mChannel // ranges from 0 to 15
             = 0
     private var mInputPort: MidiInputPort? = null
+    private var mOutputPort: MidiOutputPort? = null
+
+    private var mOpenDevice: MidiDevice? = null
+    private var mDeviceOpened = false
 
     var selectedSquare: ControlElement? = null
-
+    private var tempElements: List<ControlElement>? = null
 
     @SuppressLint("ClickableViewAccessibility", "MissingInflatedId")
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -48,6 +54,8 @@ public class MainActivity<string> : AppCompatActivity() {
         setupElementsMatrix()
         setupElementsTable()
         setupEditButton()
+
+
 
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_MIDI)) {
             setupMidi()
@@ -69,8 +77,27 @@ public class MainActivity<string> : AppCompatActivity() {
 
             // post is non-blocking
 
+            val myInputStream: InputStream
+            val myOutput: String
+            val parser = XmlPullParserHandler(this)
+            try {
+                myInputStream = assets.open("bright_kalimba.xml")
+                tempElements = parser.parse(this, myInputStream)
+                val size: Int = myInputStream.available()
+                val buffer = ByteArray(size)
+                myInputStream.read(buffer)
+                myOutput = String(buffer)
 
+                // Sets the TextView with the string
+                Log.e("Read Xml", "Done" + tempElements!!.elementAt(0).id.toString())
+
+            } catch (e: IOException) {
+                // Exception
+                e.printStackTrace()
+                Log.e("Read Xml", "Not DOne" + assets.open("bright_kalimba.xml").toString())
+            }
         }
+
     }
 
     private fun setupEditButton() {
@@ -181,22 +208,37 @@ public class MainActivity<string> : AppCompatActivity() {
         )
 
         if (mMidiManager !== null) {
-            mMidiManager?.openDevice(
-                infos.elementAt(1), { device ->
-                    if (device === null) {
-                        debugMessage("No port found!!!")
-                    } else {
-
-                        mInputPort = device.openInputPort(0)
-                        Log.e("Midi", "Port opened on ${infos.elementAt(1).properties}")
-                        Log.e("Midi", "Input port: " + mInputPort.toString())
-                        if (mInputPort == null) {
-                            Log.e("Midi", "could not open input port on ${infos.elementAt(0)}")
+            debugMessage("Порт - это ${infos.elementAt(0)}")
+            try {
+                mMidiManager!!.openDevice(infos.elementAt(0),
+                    MidiManager.OnDeviceOpenedListener { device ->
+                        if (device == null) {
+                            Log.e("OpenDevice", "could not open ${infos.elementAt(1)}")
+                        } else {
+                            mOpenDevice = device
+                            mInputPort = device.openInputPort(
+                                0
+                            )
+                            mOutputPort = device.openOutputPort(0)
+                            if (mOutputPort == null) {
+                                Log.e(
+                                    "OpenDevice",
+                                    "could not open output port for ${infos.elementAt(1)}"
+                                )
+                                return@OnDeviceOpenedListener
+                            }
+                            mOutputPort!!.connect(mDispatcher)
+                            if (mInputPort == null) {
+                                Log.e("OpenDevice", "could not open input port on ${infos.elementAt(1)}")
+                                return@OnDeviceOpenedListener
+                            }
+                            mDeviceOpened = true
                         }
-                    }
-
-                }, Handler(Looper.getMainLooper())
-            )
+                    }, null)
+                // Don't run the callback on the UI thread because this might take a while.
+            } catch (e: Exception) {
+                Log.e("OpenDevice", "openDevice failed", e)
+            }
         }
 //        mMidiManager!!.openDevice(infos.elementAt(0), OnDeviceOpenedListener { device ->
 //            if (device == null) {
@@ -207,15 +249,15 @@ public class MainActivity<string> : AppCompatActivity() {
 //                mOutputPort!!.connect(mDispatcher)
 //            }
 //        }, null)
-    }
+        }
 
-    private fun debugMessage(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-    }
+        private fun debugMessage(message: String) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
 
-    fun selectSquare(square: ControlElement) {
-        selectedSquare?.deselect()
-        selectedSquare = square
-    }
+        fun selectSquare(square: ControlElement) {
+            selectedSquare?.deselect()
+            selectedSquare = square
+        }
 
-}
+    }
